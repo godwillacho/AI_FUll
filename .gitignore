@@ -37,3 +37,5 @@ Thumbs.db
 # Git backups we created
 .git_backup_*/
 Ai_core/.git_backup_*/
+Ai_core/**/venv/
+foundermentals/pydantic/venv/
