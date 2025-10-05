@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+venv/
+.env
+.env.*
+**/venv/
+
+# Byte-compiled / optimized / DLL files
+*.so
+*.egg-info/
+
+# Distribution / packaging
+.Python
+build/
+dist/
+*.egg
+*.whl
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Archives
+*.zip
+*.tar.gz
+*.tar
+
+# Git backups we created
+.git_backup_*/
+Ai_core/.git_backup_*/
