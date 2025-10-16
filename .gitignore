@@ -39,3 +39,15 @@ Thumbs.db
 Ai_core/.git_backup_*/
 Ai_core/**/venv/
 foundermentals/pydantic/venv/
+
+# Ignore local virtual environments and heavy local data stores
+venv/
+**/venv/
+
+# Qdrant vector DB data (local)
+rag/qdrant_data/
+rag/venv/
+
+# local Agentic and Ai_core venvs
+Agentic_AI/venv/
+Ai_core/openai/venv/
