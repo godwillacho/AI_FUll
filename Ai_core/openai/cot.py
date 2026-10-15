@@ -1,3 +1,4 @@
+import os
 from openai import OpenAI
 from dotenv import load_dotenv
 import json
@@ -6,7 +7,7 @@ load_dotenv()
 
 # Loading google gemini api key into the chat gpt library
 client = OpenAI(
-    api_key = 'AIzaSyABO2mgElYUv1Ytd6O4BneOZCtoNsHCSkk',
+    api_key = os.getenv("GEMINI_API_KEY"),
     base_url = 'https://generativelanguage.googleapis.com/v1beta/'
 )
 

@@ -51,3 +51,10 @@ rag/venv/
 # local Agentic and Ai_core venvs
 Agentic_AI/venv/
 Ai_core/openai/venv/
+
+# Python virtual environments
+.venv/
+**/.venv/
+
+# Source documents for RAG (bring your own; often copyrighted)
+rag/*.pdf

@@ -1,64 +1,67 @@
-from openai import OpenAI
+"""Interactive Security+ study assistant backed by a Qdrant vector store.
+
+Retrieves the most relevant chunks from the indexed study guide, then asks
+the model to answer using only that context and to cite page numbers.
+Run index.py first to build the collection.
+"""
+
 from dotenv import load_dotenv
 from langchain_openai import OpenAIEmbeddings
 from langchain_qdrant import QdrantVectorStore
-import os 
+from openai import OpenAI
 
 load_dotenv()
-def Run_command( cmd: str):
-    result = os.system(cmd)
-    return result
+
+QDRANT_URL = "http://localhost:6333"
+COLLECTION = "learning_rag"
+MODEL = "gpt-5"
+
+SYSTEM_TEMPLATE = """You are a study assistant helping students prepare for the CompTIA Security+ exam.
+
+Rules:
+- Answer ONLY from the context below. If the context does not contain the answer, say so.
+- Always tell the user which page number(s) to open to read more.
+- Where helpful, finish with one or two practice questions based on the context.
+
+Context:
+{context}
+"""
+
 client = OpenAI()
-available_tools = {
-    "run_command" : Run_command  
-}
-embedding_model = OpenAIEmbeddings(
-    model = "text-embedding-3-large"
-)
-
+embedding_model = OpenAIEmbeddings(model="text-embedding-3-large")
 vector_db = QdrantVectorStore.from_existing_collection(
-     url = "http://localhost:6333",
-     collection_name = "learning_rag",
-     embedding = embedding_model ,
+    url=QDRANT_URL,
+    collection_name=COLLECTION,
+    embedding=embedding_model,
 )
-while True:
-    user_query = input("What can i help you with 🔠:")
-
-    search_results = vector_db.similarity_search(query = user_query)
-
-    context = "\n\n\n".join([
-        f"""Page Content: {result.page_content} \n 
-        page Number :{result.metadata['page_label']} \n 
-        File Location : {result.metadata['source']}"""
-        for result in search_results                        
-    ])
-
-    Systemprompt = f"""
-
-    -YOU ARE HELPING STUDENTS PREPARE FOR COMPTIA SECURITY+  EXAM  BASED ON THE AVAILABLE CONTEXT RETRIEVED FROMA PDF FILE ALONG WITH page_contents and page number.
-    -YOU SHOULD ONLY ANSWER THE USER BASED ON THE FOLLOWING CONTEXT AND NAVIGATE THE USER TO OPEN THE RIGHT PAGE NUMBER TO KNOW MORE.
-    -YOU CAN ALSO PROVIDE QUESTIONS BASED ON THE CONTEXT WHICH CAN HELP THE USER ASSIMILATE MORE KNOWLEDGE 
-    -YOU ARE also able to improove the quality of your output by openning the pdf file that was passed in the first place on the user computer 
-    -The Pages that are Opened should only be the relevant pages to the querry 
-    -To open this QUerry Make use of the tools in the available tools to help user interact with this pages if the precise on needing more info 
-
-    Available Tools:
-    -Run-command(cmd: str) : takes a system linux command as string and executes the command on users system and return the output from the command 
 
 
-    Context:
-    {context}
-    """
-    response = client.chat.completions.create(
-        model="gpt-5",
-        messages=[
-            {
-                "role" : "system" , "content": Systemprompt
-            },
-            {
-
-                "role" : "user" , "content": user_query 
-            },
-        ]
+def build_context(query: str) -> str:
+    results = vector_db.similarity_search(query=query, k=4)
+    return "\n\n".join(
+        f"Page {doc.metadata.get('page_label', '?')}:\n{doc.page_content}"
+        for doc in results
     )
-    print(f"🤖 {response.choices[0].message.content}")
+
+
+def main() -> None:
+    print("Security+ study assistant. Type 'exit' to quit.")
+    while True:
+        query = input("\nAsk a question: ").strip()
+        if query.lower() in {"exit", "quit"}:
+            break
+        if not query:
+            continue
+
+        response = client.chat.completions.create(
+            model=MODEL,
+            messages=[
+                {"role": "system", "content": SYSTEM_TEMPLATE.format(context=build_context(query))},
+                {"role": "user", "content": query},
+            ],
+        )
+        print(f"\n{response.choices[0].message.content}")
+
+
+if __name__ == "__main__":
+    main()

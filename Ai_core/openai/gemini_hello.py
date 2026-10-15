@@ -1,7 +1,8 @@
+import os
 from google import genai
 
 client = genai.Client(
-    api_key = 'AIzaSyABO2mgElYUv1Ytd6O4BneOZCtoNsHCSkk'
+    api_key = os.getenv("GEMINI_API_KEY")
 )
 
 response = client.models.generate_content(
