@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -6,7 +7,14 @@ from langchain_qdrant import QdrantVectorStore
 from dotenv import load_dotenv
 
 load_dotenv() 
-pdf_path = Path(__file__).parent / "David_seidi.pdf"
+
+# Usage: python index.py path/to/your_study_guide.pdf
+# The PDF is not included in this repository; supply your own copy.
+if len(sys.argv) != 2:
+    sys.exit("Usage: python index.py <path-to-pdf>")
+pdf_path = Path(sys.argv[1])
+if not pdf_path.is_file():
+    sys.exit(f"PDF not found: {pdf_path}")
 
 # loading file into python program 
 loader = PyPDFLoader(file_path = pdf_path)
